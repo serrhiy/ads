@@ -1,14 +1,10 @@
 #include <stdio.h>
 
 double wrapMyCos(double x, unsigned n, double* previos) {
-  if (n <= 1) {
-    printf("F%u comeback: %lf\n", n, *previos);
-    return *previos;
-  }
+  if (n <= 1) return *previos;
   const double totalSum = wrapMyCos(x, n - 1, previos);
   const unsigned i = n - 1;
   const double next = -*previos * (x * x) / (4 * i * i - 2 * i);
-  printf("F%u comeback: %lf\n", n, next);
   const double sum = totalSum + next;
   *previos = next;
   return sum;
