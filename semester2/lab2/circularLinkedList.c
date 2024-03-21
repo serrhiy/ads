@@ -26,21 +26,21 @@ linkedList* listPush(linkedList* list, int data) {
 }
 
 void listDestroy(linkedList* list) {
-  linkedList* head = list;
   linkedList* tail = list->prev;
-  while (head != tail) {
-    head = head->next;
-    free(head->prev);
+  linkedList* prev = NULL;
+  while (tail != list) {
+    prev = tail->prev;
+    free(tail);
+    tail = prev;
   }
-  free(head);
+  free(list);
 }
 
 int calculate(linkedList* list) {
   linkedList* tail = list->prev;
   linkedList* head = list;
-  linkedList* first = list;
-  double result = 1;
-  while (tail != first) {
+  int result = 1;
+  while (tail != list) {
     result *= (tail->data + tail->prev->data + 2 * head->data);
     tail = tail->prev;
     head = head->next;
@@ -73,20 +73,3 @@ int main(int argc, char const *argv[]) {
   listDestroy(list);
   return 0;
 }
-
-// linkedList* listInit(int data) {
-//   linkedList* list = malloc(sizeof(linkedList));
-//   if (list == NULL) return NULL;
-//   *list = (linkedList){ data, list, list };
-//   return list;
-// }
-
-// linkedList* listPush(linkedList* list, int data) {
-//   linkedList* node = malloc(sizeof(linkedList));
-//   if (node == NULL) return NULL;
-//   linkedList* tail = list->prev;
-//   *node = (linkedList){ data, tail, list };
-//   tail->next = node;
-//   list->prev = node;
-//   return node;
-// }
