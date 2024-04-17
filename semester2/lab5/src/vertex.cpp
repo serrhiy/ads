@@ -3,7 +3,6 @@
 #include <functional>
 #include <string>
 #include <cmath>
-#include <iostream>
 #include "config.hpp"
 #include "vertex.hpp"
 #include "utils.hpp"
@@ -27,8 +26,11 @@ float distance(float x1, float y1, float x2, float y2) {
   return sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
-std::function<Vector2f(size_t)> bezierCurve2Item(
-  const Vector2f& p1, const Vector2f& p2, const Vector2f& p3, int items
+std::function<Vector2f(size_t)> bezierCurve2Closure(
+  const Vector2f& p1,
+  const Vector2f& p2,
+  const Vector2f& p3,
+  int items
 ) {
   const float step{ 1.f / items };
   return [&p1, &p2, &p3, step](size_t i) {
@@ -90,8 +92,8 @@ void arrows(
   float delta,
   const sf::Color& color
 ) {
-  const auto [lx, ly] = rotate(x, y, config::ARROWS_LENGTH, fi + delta);
-  const auto [rx, ry] = rotate(x, y, config::ARROWS_LENGTH, fi - delta);
+  const auto [lx, ly]{ rotate(x, y, config::ARROWS_LENGTH, fi + delta) };
+  const auto [rx, ry]{ rotate(x, y, config::ARROWS_LENGTH, fi - delta) };
   line(window, { lx, ly }, { x, y }, color);
   line(window, { x, y }, { rx, ry }, color);
 }
@@ -130,7 +132,7 @@ void vertex::arcConnect(
   const float fi2{ atan2f(radius, center) };
   const auto [x3, y3]{ rotate(x1, y1, length, fi - fi2) };
 
-  const auto bezier{ bezierCurve2Item({ x1, y1 }, { x3, y3 }, { x2, y2 }, config::CURVE_ITEMS) };
+  const auto bezier{ bezierCurve2Closure({ x1, y1 }, { x3, y3 }, { x2, y2 }, config::CURVE_ITEMS) };
   for (size_t i{ 0 }; i < config::CURVE_ITEMS; i++) {
     line(window, bezier(i), bezier(i + 1), color);
   }
@@ -138,12 +140,12 @@ void vertex::arcConnect(
 }
 
 void vertex::loop(RenderWindow& window, const Vertex& vertex, bool dir, const sf::Color& color) {
-  const float x = vertex.x;
-  const float y = vertex.y - config::VERTEX_RADIUS - config::LINE_WIDTH;
+  const float x{ vertex.x };
+  const float y{ vertex.y - config::VERTEX_RADIUS - config::LINE_WIDTH };
   const auto [x1, y1]{ rotate(x, y, config::VERTEX_RADIUS, -PI / 4) };
   const auto [x2, y2]{ rotate(x, y, config::VERTEX_RADIUS, -3 * PI / 4) };
   line(window, { x, y }, { x1, y1 }, color);
-  line(window, { x1 + config::LINE_WIDTH / 2, y1 }, { x2 - config::LINE_WIDTH / 2, y2 }, color);
+  line(window, { x1 + config::LINE_WIDTH / 3, y1 }, { x2 - config::LINE_WIDTH / 3, y2 }, color);
   line(window, { x2, y2 }, { x, y }, color);
   if (dir) arrows(window, x, y, PI / 4 + PI, PI / 8, color);
 }

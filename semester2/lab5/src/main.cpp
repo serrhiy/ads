@@ -8,7 +8,7 @@
 #include <iostream>
 
 using namespace std::placeholders;
-using utils::events_t;
+using utils::events_t, graph::dfs_item, graph::bfs_item;
 
 void drawGraph(sf::RenderWindow& window, const matrix_t& matrix) {
   utils::clearWindow(window, config::BACKGROUND_COLOR);
@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
     return 0;
   }
   
-  const auto dfs{ graph::getAllPaths(directed, start, graph::dfs) };
-  const auto bfs{ graph::getAllPaths(directed, start, graph::bfs) };
+  const auto dfs{ graph::getAllPaths<dfs_item>(directed, start, graph::dfs) };
+  const auto bfs{ graph::getAllPaths<bfs_item>(directed, start, graph::bfs) };
 
   std::cout << "Dfs:\n" << dfs << std::endl;
   std::cout << "Bfs:\n" << bfs << std::endl;
@@ -41,14 +41,14 @@ int main(int argc, char* argv[]) {
   const events_t myEvents {
     std::make_tuple(
       utils::onKeyDown(sf::Keyboard::Space),
-      draw::drawRouteClosure(directed, bfs),
-      "BFS"
+      draw::drawDFSRouteClosure(directed, dfs),
+      "DFS"
     ),
     std::make_tuple(
       utils::onKeyDown(sf::Keyboard::Space),
-      draw::drawRouteClosure(directed, dfs),
-      "DFS"
-    )
+      draw::drawBFSRouteClosure(directed, bfs),
+      "BFS"
+    ),
   };
   utils::pollEvents(window, myEvents, std::bind(drawGraph, _1, directed));
   return 0;
