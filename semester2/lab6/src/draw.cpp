@@ -3,6 +3,7 @@
 #include <memory>
 #include <functional>
 #include <string>
+#include <iostream>
 #include "draw.hpp"
 #include "vertex.hpp"
 #include "matrix.hpp"
@@ -35,8 +36,8 @@ bool inOneLine(size_t count, size_t sides, size_t i, size_t j) {
   if (i > j) std::swap(i, j);
   const auto split{ static_cast<size_t>(ceil(static_cast<double>(count) / sides)) };
   const auto cnt{ count - 1 };
-  const auto last{ cnt - cnt % split };
-  if (i == 0 && j >= last && j < cnt) return true;
+  const auto max{ split * sides - 1 };
+  if (i == 0 && j > (max - split)) return true;
   const auto start{ i - i % split };
   const auto end{ start + split };
   return j >= start && j <= end;
@@ -54,13 +55,15 @@ void connectVertices(
   const auto i{ from.index };
   const auto j{ to.index };
   const auto count{ matrix.size() };
-  if (!isNeighbours(count, i, j) && inOneLine(count, sides, i, j)) {
-    vertex::arcConnect(window, from, to, directed, color);
-    return;
-  }
-  const bool shift{ j < i && matrix[j][i] };
   const std::string str{ std::to_string(matrix[i][j]) };
-  vertex::lineConnect(window, from, to, str, shift, directed, color);
+  if (i == j) vertex::loop(window, from);
+  else if (!isNeighbours(count, i, j) && inOneLine(count, sides, i, j)) {
+    vertex::arcConnect(window, from, to, str, directed, color);
+  }
+  else {
+    const bool shift{ j < i && matrix[j][i] };
+    vertex::lineConnect(window, from, to, str, shift, directed, color);
+  }
 }
 
 void draw::drawGraph(sf::RenderWindow& window, const matrix_t& matrix, size_t sides, int size) {
@@ -75,8 +78,7 @@ void draw::drawGraph(sf::RenderWindow& window, const matrix_t& matrix, size_t si
     for (size_t j{ 0 }; j < count; j++) {
       if (!matrix[i][j]) continue;
       const auto otherVertex{ getVertex(j) };
-      if (i == j) vertex::loop(window, vertex);
-      else connect(window, vertex, otherVertex);
+      connect(window, vertex, otherVertex);
     }
   }
 }

@@ -14,7 +14,7 @@ namespace config {
   const sf::Color ACTIVE_VERTEX_COLOR{ sf::Color::Red };
   const std::string FONT_PATH{ "./fonts/arial.ttf" };
   const unsigned TEXT_SIZE{ 32 };
-  const unsigned LABEL_SIZE{ 22 };
+  const unsigned LABEL_SIZE{ 24 };
   const float ARROWS_LENGTH{ 15 };
   const unsigned CURVE_ITEMS{ 20 };
   const int n1{ 3 }, n2{ 1 }, n3{ 1 }, n4{ 2 };

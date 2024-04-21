@@ -32,19 +32,19 @@ std::function<Vector2f(size_t)> bezierCurve2Closure(
   const Vector2f& p3,
   int items
 ) {
-  const float step{ 1.f / items };
+  const auto step{ 1.f / items };
   return [&p1, &p2, &p3, step](size_t i) {
-    const float t{ step * i };
-    const float t1{ 1 - t };
+    const auto t{ step * i };
+    const auto t1{ 1 - t };
     return t1 * t1 * p1 + 2 * t1 * t * p2 + t * t * p3;
   };
 }
 
 void drawCircle(RenderWindow& window, const Vector2f& posc, const sf::Color& color) {
-  const Vector2f position {
+  const auto position { Vector2f{
     posc.x - config::VERTEX_RADIUS,
     posc.y - config::VERTEX_RADIUS,
-  };
+  } };
   sf::CircleShape circle{ config::VERTEX_RADIUS };
   circle.setPosition(position);
   circle.setFillColor(config::BACKGROUND_COLOR);
@@ -54,16 +54,16 @@ void drawCircle(RenderWindow& window, const Vector2f& posc, const sf::Color& col
 }
 
 void vertex::drawText(RenderWindow& window, const Vector2f& posc, const string& txt, const sf::Color& color) {
-  const sf::Font font{ utils::getFont() };
-  sf::Text text{ txt, font, config::TEXT_SIZE };
+  const auto font{ utils::getFont() };
+  auto text{ sf::Text{ txt, font, config::TEXT_SIZE } };
   text.setFillColor(color);
-  sf::FloatRect r{ text.getGlobalBounds() };
+  const auto r{ text.getGlobalBounds() };
   text.setPosition(posc - r.getPosition() - r.getSize() / 2.f);
   window.draw(text);
 }
 
 void vertex::draw(RenderWindow& window, const Vertex& vertex, const sf::Color& color) {
-  const Vector2f vector{ vertex.x, vertex.y };
+  const auto vector{ Vector2f{ vertex.x, vertex.y } };
   drawCircle(window, vector, color);
   drawText(window, vector, std::to_string(vertex.index), color);
 }
@@ -74,8 +74,8 @@ void line(
   const Vector2f& to,
   const sf::Color& color
 ) {
-  const float length{ distance(from.x, from.y, to.x, to.y) };
-  const float fi{ atan2f(to.y - from.y , to.x - from.x) };
+  const auto length{ distance(from.x, from.y, to.x, to.y) };
+  const auto fi{ atan2f(to.y - from.y , to.x - from.x) };
   sf::RectangleShape rec{ { length, config::LINE_WIDTH } };
   rec.setFillColor(color);
   rec.setOrigin({ 0, config::LINE_WIDTH / 2 });
@@ -106,9 +106,9 @@ void vertex::lineConnect(
   bool dir,
   const sf::Color& color
 ) {
-  const float fi{ atan2f(to.y - from.y, to.x - from.x) };
-  const float f1{ shift ? fi - PI / 8 : fi  };
-  const float f2{ shift ? fi + PI + PI / 8 : fi + PI };
+  const auto fi{ atan2f(to.y - from.y, to.x - from.x) };
+  const auto f1{ shift ? fi - PI / 8 : fi  };
+  const auto f2{ shift ? fi + PI + PI / 8 : fi + PI };
   const auto [x1, y1]{ rotate(from.x, from.y, config::VERTEX_RADIUS + config::LINE_WIDTH, f1) };
   const auto [x2, y2]{ rotate(to.x, to.y, config::VERTEX_RADIUS + config::LINE_WIDTH, f2) };
   line(window, { x1, y1 }, { x2, y2 }, color);
@@ -116,27 +116,32 @@ void vertex::lineConnect(
 }
 
 void vertex::arcConnect(
-  RenderWindow& window,
+  sf::RenderWindow& window,
   const Vertex& from,
   const Vertex& to,
   bool dir,
   const sf::Color& color
 ) {
-  const float fi{ atan2f(to.y - from.y, to.x - from.x) };
+  const auto fi{ atan2f(to.y - from.y, to.x - from.x) };
   const auto [x1, y1]{ rotate(from.x, from.y, config::VERTEX_RADIUS + config::LINE_WIDTH, fi - PI / 6) };
   const auto [x2, y2]{ rotate(to.x, to.y, config::VERTEX_RADIUS + config::LINE_WIDTH, fi + PI + PI / 6) };
+  
+  const auto dx{ x2 - x1 };
+  const auto dy{ y2 - y1 };
 
-  const float radius{ 2.f * config::VERTEX_RADIUS };
-  const float center{ distance(x1, y1, x2, y2) / 2.f };
-  const float length{ sqrtf(center * center + radius * radius) };
-  const float fi2{ atan2f(radius, center) };
-  const auto [x3, y3]{ rotate(x1, y1, length, fi - fi2) };
-
-  const auto bezier{ bezierCurve2Closure({ x1, y1 }, { x3, y3 }, { x2, y2 }, config::CURVE_ITEMS) };
+  const auto height{ 2.f * config::VERTEX_RADIUS };
+  const auto length{ sqrtf(dx * dx + dy * dy) };
+  const auto parallel{ sf::Vector2f{ dy, -dx } / length };
+  const auto center{ sf::Vector2f{ (x1 + x2) / 2.f, (y1 + y2) / 2.f } };
+  const auto top{ center + height * parallel };
+  const auto bezier{ bezierCurve2Closure({ x1, y1 }, top, { x2, y2 }, config::CURVE_ITEMS) };
   for (size_t i{ 0 }; i < config::CURVE_ITEMS; i++) {
     line(window, bezier(i), bezier(i + 1), color);
   }
-  if (dir) arrows(window, x2, y2, fi + fi2 + PI, PI / 8, color);
+  if (dir) {
+    const auto f{ atan2f(top.y - y2, top.x - x2) };
+    arrows(window, x2, y2, f, PI / 8, color);
+  }
 }
 
 void vertex::loop(RenderWindow& window, const Vertex& vertex, bool dir, const sf::Color& color) {

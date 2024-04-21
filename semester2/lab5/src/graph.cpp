@@ -6,21 +6,31 @@
 
 using matrix::matrix_t, matrix::row_t, graph::dfs_path, graph::bfs_path, graph::search_t;
 
-dfs_path dfsRecursive(const matrix_t& matrix, size_t start, std::vector<bool>& visited, dfs_path& path) {
-  visited[start] = true;
-  const size_t size{ matrix.size() };
-  for (size_t i{ 0 }; i < size; i++) {
-    if (!matrix[start][i] || visited[i]) continue;
-    path.push_back(std::make_pair(start, true));
-    dfsRecursive(matrix, i, visited, path);
-    path.push_back(std::make_pair(i, false));
-  }
-  return path;
-}
-
 dfs_path graph::dfs(const matrix_t& matrix, size_t start, std::vector<bool>& visited, dfs_path& path) {
-  dfsRecursive(matrix, start, visited, path);
-  path.push_back(std::make_pair(start, 0));
+  const auto size{ matrix.size() };
+  visited[start] = true;
+  std::stack<size_t> stack;
+  bool returns{ false };
+  stack.push(start);
+  path.push_back({ start, false });
+  while (!stack.empty()) {
+    const auto vertex{ stack.top() };
+    if (returns) path.push_back({ vertex, false });
+    bool flag{ false };
+    for (size_t i{ 0 }; i < size; i++) {
+      if (!matrix[vertex][i] || visited[i]) continue;
+      returns = false;
+      flag = true;
+      stack.push(i);
+      path.push_back({ i, true });
+      visited[i] = true;
+      break;
+    }
+    if (!flag) {
+      stack.pop();
+      returns = true;
+    }
+  }
   return path;
 }
 
@@ -39,7 +49,7 @@ bfs_path graph::bfs(const matrix_t& matrix, size_t start, std::vector<bool>& vis
       visited[i] = true;
       q.push(i);
     }
-    path.push_back(std::make_pair(vertex, neighbours));
+    path.push_back({ vertex, neighbours });
   }
   return path;
 }

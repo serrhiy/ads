@@ -14,14 +14,14 @@ const std::array colors{
   sf::Color(255, 154, 141), // Salmon
   sf::Color(255, 165, 0),   // Orange
   sf::Color::Yellow,        // Yellow
-  sf::Color(188,169,225),  // Light Purple
+  sf::Color(188, 169, 225), // Light Purple
   sf::Color::Green,         // Green
-  sf::Color(231,236,163),   // Light Yellow
+  sf::Color(231, 236, 163), // Light Yellow
   sf::Color::Magenta,       // Magenta
   sf::Color(255, 110, 64),  // Red-orange
   sf::Color(24, 104, 174),  // Burnt sienna
   sf::Color(229, 33, 101),  // Pink
-  sf::Color(157,225,154),   // Ligh Green
+  sf::Color(157, 225, 154),  // Ligh Green
   sf::Color(178, 2, 56),    // Brick
   sf::Color(255, 193, 59),  // Mango
 };
@@ -35,8 +35,8 @@ bool inOneLine(size_t count, size_t sides, size_t i, size_t j) {
   if (i > j) std::swap(i, j);
   const auto split{ static_cast<size_t>(ceil(static_cast<double>(count) / sides)) };
   const auto cnt{ count - 1 };
-  const auto last{ cnt - cnt % split };
-  if (i == 0 && j >= last && j < cnt) return true;
+  const auto max{ split * sides - 1 };
+  if (i == 0 && j > max - split) return true;
   const auto start{ i - i % split };
   const auto end{ start + split };
   return j >= start && j <= end;
@@ -54,12 +54,14 @@ void connectVertices(
   const auto i{ from.index };
   const auto j{ to.index };
   const auto count{ matrix.size() };
-  if (!isNeighbours(count, i, j) && inOneLine(count, sides, i, j)) {
+  if (i == j) vertex::loop(window, from);
+  else if (!isNeighbours(count, i, j) && inOneLine(count, sides, i, j)) {
     vertex::arcConnect(window, from, to, directed, color);
-    return;
   }
-  const bool shift{ j < i && matrix[j][i] };
-  vertex::lineConnect(window, from, to, shift, directed, color);
+  else {
+    const bool shift{ j < i && matrix[j][i] };
+    vertex::lineConnect(window, from, to, shift, directed, color);
+  }
 }
 
 void draw::drawGraph(sf::RenderWindow& window, const matrix_t& matrix, size_t sides, int size) {
@@ -74,8 +76,7 @@ void draw::drawGraph(sf::RenderWindow& window, const matrix_t& matrix, size_t si
     for (size_t j{ 0 }; j < count; j++) {
       if (!matrix[i][j]) continue;
       const auto otherVertex{ getVertex(j) };
-      if (i == j) vertex::loop(window, vertex);
-      else connect(window, vertex, otherVertex);
+      connect(window, vertex, otherVertex);
     }
   }
 }
@@ -104,17 +105,17 @@ std::function<void(sf::RenderWindow&, bool)> draw::drawDFSRouteClosure(
         vertex::draw(window, to, color);
         return; 
       }
-      const auto i{ route[step].first };
+      const auto [i, needConnect]{ route[step] };
       const auto active{ getVertex(i) };
       vertex::draw(window, active, config::ACTIVE_VERTEX_COLOR);
       if (step == 0) return;
-      const auto [j, needConnect]{ route[step - 1] };
+      const auto [j, needPrevConnect]{ route[step - 1] };
       const auto prevActive{ getVertex(j) };
       const auto color{ colors[j % colorSize] };
       if (needConnect) connect(window, prevActive, active, config::ACTIVE_VERTEX_COLOR);
       vertex::draw(window, prevActive, color);
       if (step >= 2) {
-        const auto [k, needPrevConnect]{ route[step - 2] };
+        const auto k{ route[step - 2].first };
         const auto ppActive{ getVertex(k) };
         const auto color{ colors[k % colorSize] };
         if (needPrevConnect) connect(window, ppActive, prevActive, color);
@@ -158,7 +159,6 @@ size_t totalBFSSteps(const graph::bfs_path& path) {
   return count;
 }
 
-#include <iostream>
 std::function<void(sf::RenderWindow&, bool)> draw::drawBFSRouteClosure(
   const matrix_t& matrix,
   const bfs_path& route,
