@@ -1,10 +1,14 @@
 #include <SFML/Graphics.hpp>
+#include <functional>
+#include <set>
+#include <iostream>
 #include "config.hpp"
 #include "utils.hpp"
-#include <iostream>
-#include <functional>
 
 using utils::events_t;
+using pair_set = std::set<std::pair<size_t, size_t>, decltype([](const auto& x, const auto& y) {
+  return x.first < y.first;
+})>;
 
 sf::RenderWindow& utils::manageWindow(
   sf::RenderWindow& window, unsigned width, unsigned height, const char* title
@@ -91,6 +95,39 @@ void utils::pollEvents(sf::RenderWindow& window) {
       }
     }
   }
+}
+
+void printNewVertexNumbering(const pair_set& set) {
+  for (const auto& [oldIndex, newIndex]: set) {
+    std::cout << "Vertex Index: " << oldIndex
+      << ", the number of the vertex in the detour: " << newIndex << std::endl;
+  }
+}
+
+void utils::printNewVertexNumberingDFS(const dfs_path& path) {
+  const auto size{ path.size() };
+  auto set{ pair_set{  } };
+  for (size_t i{ 0 }; i < size; i++) {
+    const auto item{ path[i] };
+    if (!item.second) continue;
+    set.insert({ item.first, i });
+  }
+  printNewVertexNumbering(set);
+}
+
+void utils::printNewVertexNumberingBFS(const bfs_path& path) {
+  const auto size{ path.size() };
+  auto set{ pair_set{  } };
+  auto index{ size_t{ 0 } };
+  if (size) set.insert({ path[0].first, index });
+  for (const auto &[vertex, neighbours]: path) {
+    index++;
+    for (const auto& neighbour: neighbours) {
+      set.insert({ neighbour, index });
+      index++;
+    }
+  }
+  printNewVertexNumbering(set);
 }
 
 void utils::pollEvents(

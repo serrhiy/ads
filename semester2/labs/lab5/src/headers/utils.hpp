@@ -29,4 +29,6 @@ namespace utils {
   std::function<bool(const sf::Event&)> onKeyDown(const sf::Keyboard::Key& key);
   void clearWindow(sf::RenderWindow& window, const sf::Color& color);
   size_t getFistOutVertex(const matrix_t& matrix);
+  void printNewVertexNumberingDFS(const dfs_path& path);
+  void printNewVertexNumberingBFS(const bfs_path& path);
 }

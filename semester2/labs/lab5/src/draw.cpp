@@ -21,7 +21,7 @@ const std::array colors{
   sf::Color(255, 110, 64),  // Red-orange
   sf::Color(24, 104, 174),  // Burnt sienna
   sf::Color(229, 33, 101),  // Pink
-  sf::Color(157, 225, 154),  // Ligh Green
+  sf::Color(157, 225, 154), // Ligh Green
   sf::Color(178, 2, 56),    // Brick
   sf::Color(255, 193, 59),  // Mango
 };
@@ -91,7 +91,7 @@ std::function<void(sf::RenderWindow&, bool)> draw::drawDFSRouteClosure(
   const auto connect{ std::bind(connectVertices, _1, matrix, sides, _2, _3, _4, true) };
   const auto stepP{ std::make_shared<size_t>(0) };
   const auto routeSize{ route.size() };
-  const auto drawRoute { 
+  const auto drawRoute {
     [getVertex, connect, &route](sf::RenderWindow& window, size_t step) {
       const auto colorSize{ colors.size() };
       if (step == route.size()) {

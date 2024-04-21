@@ -5,20 +5,21 @@
 using matrix::matrix_t, graph::search_t;
 
 template<typename T>
-std::vector<T> graph::getAllPaths(
+std::pair<std::vector<T>, matrix_t> graph::getAllPaths(
   const matrix_t& matrix,
   size_t start,
   search_t<T> search
 ) {
-  const size_t size{ matrix.size() };
-  std::vector<bool> visited(size, false);
-  std::vector<T> paths;
+  const auto size{ matrix.size() };
+  auto visited{ std::vector<bool>(size, false) };
+  auto paths{ std::vector<T>{  } };
   paths.reserve(size - 1);
-  bool hasUnvisited{ false };
-  size_t startIndex{ start };
+  auto traversalTree{ matrix::initMatrix(size) };
+  auto hasUnvisited{ false };
+  auto startIndex{ start };
   do {
     hasUnvisited = false;
-    search(matrix, startIndex, visited, paths);
+    search(matrix, startIndex, visited, paths, traversalTree);
     for (size_t i{ 0 }; i < size; i++) {
       if (visited[i]) continue;
       hasUnvisited = true;
@@ -27,5 +28,5 @@ std::vector<T> graph::getAllPaths(
     }
     
   } while (hasUnvisited);
-  return paths;
+  return std::make_pair(paths, traversalTree);
 }

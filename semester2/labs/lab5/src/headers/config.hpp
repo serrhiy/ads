@@ -22,4 +22,3 @@ namespace config {
   extern const size_t SIDES;
   extern const int SEED;
 }
-

@@ -8,7 +8,7 @@
 using matrix::matrix_t, matrix::row_t;
 
 float random(float min, float max) {
-  const float r{ static_cast<float>(rand()) / (RAND_MAX + 1) };
+  const auto r{ static_cast<float>(rand()) / (RAND_MAX + 1) };
   return r * (max - min) + min;
 }
 
@@ -27,7 +27,7 @@ matrix_t matrix::adjacencyMatrix(int size, int seed, float k) {
 }
 
 matrix_t matrix::toUndirected(const matrix_t &matrix) {
-  const size_t size{ matrix.size() };
+  const auto size{ matrix.size() };
   matrix_t result(size);
   for (size_t i{ 0 }; i < size; i++) {
     row_t row(size);
@@ -39,20 +39,28 @@ matrix_t matrix::toUndirected(const matrix_t &matrix) {
   return result;
 }
 
+matrix_t matrix::initMatrix(size_t length) {
+  matrix_t matrix(length);
+  for (size_t i{ 0 }; i < length; i++) {
+    matrix[i] = row_t(length);
+  }
+  return matrix;
+}
+
 std::ostream& operator<<(std::ostream& os, const matrix_t& matrix) {
-  const size_t length{ matrix.size() };
-  const size_t indent{ std::to_string(length).length() };
-  const size_t width{ indent * 2 };
+  const auto length{ matrix.size() };
+  const auto indent{ std::to_string(length).length() };
+  const auto width{ indent * 2 };
   os << std::setw(width) << ' ';
-  for (int i = 0; i < length; ++i) {
+  for (size_t i{ 0 }; i < length; ++i) {
     os << std::setw(width) << i << ' ';
   }
   os << std::endl << std::setw(width) << ' ';
   os << std::setw((width + 1) * length) << std::setfill('-') << '-';
   os << std::setfill(' ') << std::endl;
-  for (int i = 0; i < length; ++i) {
+  for (size_t i{ 0 }; i < length; ++i) {
     os << std::setw(indent) << i << " |";
-    for (int j = 0; j < length; ++j) {
+    for (size_t j{ 0 }; j < length; ++j) {
       os << std::setw(width) << matrix[i][j] << ' ';
     }
     os << std::endl;

@@ -8,6 +8,7 @@ namespace matrix {
 
   matrix_t adjacencyMatrix(int size, int seed, float k);
   matrix_t toUndirected(const matrix_t& matrix);
+  matrix_t initMatrix(size_t length);
 }
 
 std::ostream& operator<<(std::ostream& os, const matrix::matrix_t& matrix);

@@ -6,13 +6,19 @@
 
 using matrix::matrix_t, matrix::row_t, graph::dfs_path, graph::bfs_path, graph::search_t;
 
-dfs_path graph::dfs(const matrix_t& matrix, size_t start, std::vector<bool>& visited, dfs_path& path) {
+std::pair<dfs_path, matrix_t> graph::dfs(
+  const matrix_t& matrix,
+  size_t start,
+  std::vector<bool>& visited,
+  dfs_path& path,
+  matrix_t& dfsMatrix
+) {
   const auto size{ matrix.size() };
   visited[start] = true;
-  std::stack<size_t> stack;
-  bool returns{ false };
+  auto stack{ std::stack<size_t>{  } };
   stack.push(start);
-  path.push_back({ start, false });
+  path.push_back({ start, true });
+  auto returns{ false };
   while (!stack.empty()) {
     const auto vertex{ stack.top() };
     if (returns) path.push_back({ vertex, false });
@@ -21,6 +27,7 @@ dfs_path graph::dfs(const matrix_t& matrix, size_t start, std::vector<bool>& vis
       if (!matrix[vertex][i] || visited[i]) continue;
       returns = false;
       flag = true;
+      dfsMatrix[vertex][i] = 1;
       stack.push(i);
       path.push_back({ i, true });
       visited[i] = true;
@@ -31,27 +38,34 @@ dfs_path graph::dfs(const matrix_t& matrix, size_t start, std::vector<bool>& vis
       returns = true;
     }
   }
-  return path;
+  return std::make_pair(path, dfsMatrix);
 }
 
-bfs_path graph::bfs(const matrix_t& matrix, size_t start, std::vector<bool>& visited, bfs_path& path) {
-  const size_t size{ matrix.size() };
-  std::queue<size_t> q;
+std::pair<bfs_path, matrix_t> graph::bfs(
+  const matrix_t& matrix,
+  size_t start,
+  std::vector<bool>& visited,
+  bfs_path& path,
+  matrix_t& bfsMatrix
+) {
+  const auto size{ matrix.size() };
+  auto q{ std::queue<size_t>{  } };
   visited[start] = true;
   q.push(start);
   while (!q.empty()) {
     const size_t vertex{ q.front() };
     q.pop();
-    std::vector<size_t> neighbours;
+    auto neighbours{ std::vector<size_t>{  } };
     for (size_t i{ 0 }; i < size; i++) {
       if (!matrix[vertex][i] || visited[i]) continue;
       neighbours.push_back(i);
+      bfsMatrix[vertex][i] = 1;
       visited[i] = true;
       q.push(i);
     }
     path.push_back({ vertex, neighbours });
   }
-  return path;
+  return std::make_pair(path, bfsMatrix);
 }
 
 std::ostream& operator<<(std::ostream& os, const graph::dfs_path& path) {
@@ -64,7 +78,7 @@ std::ostream& operator<<(std::ostream& os, const graph::dfs_path& path) {
 }
 
 std::ostream& operator<<(std::ostream& os, const graph::bfs_path& path) {
-  for (const auto &[from, neighbours]: path) {
+  for (const auto& [from, neighbours]: path) {
     const auto size{ neighbours.size() };
     os << from << " --> ";
     if (size >= 1) {

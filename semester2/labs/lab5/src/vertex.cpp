@@ -9,7 +9,7 @@
 
 using sf::RenderWindow, sf::Vector2f, std::string, vertex::Vertex;
 
-const float PI{ static_cast<float>(M_PI) };
+const auto PI{ static_cast<float>(M_PI) };
 
 std::pair<float, float> rotate(float x, float y, float l, float fi) {
   return std::make_pair(
@@ -26,7 +26,7 @@ float distance(float x1, float y1, float x2, float y2) {
   return sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
-std::function<Vector2f(size_t)> bezierCurve2Closure(
+std::function<Vector2f(size_t)> bezierCurve(
   const Vector2f& p1,
   const Vector2f& p2,
   const Vector2f& p3,
@@ -45,7 +45,7 @@ void drawCircle(RenderWindow& window, const Vector2f& posc, const sf::Color& col
     posc.x - config::VERTEX_RADIUS,
     posc.y - config::VERTEX_RADIUS,
   } };
-  sf::CircleShape circle{ config::VERTEX_RADIUS };
+  auto circle{ sf::CircleShape{ config::VERTEX_RADIUS } };
   circle.setPosition(position);
   circle.setFillColor(config::BACKGROUND_COLOR);
   circle.setOutlineThickness(config::LINE_WIDTH);
@@ -134,7 +134,7 @@ void vertex::arcConnect(
   const auto parallel{ sf::Vector2f{ dy, -dx } / length };
   const auto center{ sf::Vector2f{ (x1 + x2) / 2.f, (y1 + y2) / 2.f } };
   const auto top{ center + height * parallel };
-  const auto bezier{ bezierCurve2Closure({ x1, y1 }, top, { x2, y2 }, config::CURVE_ITEMS) };
+  const auto bezier{ bezierCurve({ x1, y1 }, top, { x2, y2 }, config::CURVE_ITEMS) };
   for (size_t i{ 0 }; i < config::CURVE_ITEMS; i++) {
     line(window, bezier(i), bezier(i + 1), color);
   }
@@ -145,8 +145,8 @@ void vertex::arcConnect(
 }
 
 void vertex::loop(RenderWindow& window, const Vertex& vertex, bool dir, const sf::Color& color) {
-  const float x{ vertex.x };
-  const float y{ vertex.y - config::VERTEX_RADIUS - config::LINE_WIDTH };
+  const auto x{ vertex.x };
+  const auto y{ vertex.y - config::VERTEX_RADIUS - config::LINE_WIDTH };
   const auto [x1, y1]{ rotate(x, y, config::VERTEX_RADIUS, -PI / 4) };
   const auto [x2, y2]{ rotate(x, y, config::VERTEX_RADIUS, -3 * PI / 4) };
   line(window, { x, y }, { x1, y1 }, color);
@@ -156,7 +156,7 @@ void vertex::loop(RenderWindow& window, const Vertex& vertex, bool dir, const sf
 }
 
 float calculateStep(float size, int count, int sides) {
-  const float denominator{ ceilf(static_cast<float>(count) / sides) + 1 };
+  const auto denominator{ ceilf(static_cast<float>(count) / sides) + 1 };
   return static_cast<float>(size) / denominator;
 }
 
@@ -176,11 +176,11 @@ const std::function<std::pair<float, float>(int, int, float, float)> cases[] {
 };
 
 std::function<Vertex(size_t)> vertex::getVertexClosure(size_t count, size_t sides, int width) {
-  const int split{ static_cast<int>(ceilf(static_cast<float>(count) / sides)) };
-  const float step{ calculateStep(width, count, sides) };
-  const float start{ step / 2.f };
+  const auto split{ static_cast<int>(ceilf(static_cast<float>(count) / sides)) };
+  const auto step{ calculateStep(width, count, sides) };
+  const auto start{ step / 2.f };
   return [split, step, start](size_t index) {
-    const int side{ static_cast<int>(floorf(static_cast<float>(index) / split)) };
+    const auto side{ static_cast<int>(floorf(static_cast<float>(index) / split)) };
     const auto [x, y]{ cases[side](index % split, split, step, start) };
     return Vertex{ x, y, index };
   };

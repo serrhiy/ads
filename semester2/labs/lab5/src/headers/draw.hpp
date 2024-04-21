@@ -1,10 +1,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <functional>
 #include "config.hpp"
 #include "matrix.hpp"
 #include "graph.hpp"
 #include "vertex.hpp"
-#include <functional>
+
 using matrix::matrix_t, graph::dfs_path, graph::bfs_path;
 
 namespace draw {
@@ -22,5 +23,3 @@ namespace draw {
     int size = config::WIDTH
   );
 }
-
-
