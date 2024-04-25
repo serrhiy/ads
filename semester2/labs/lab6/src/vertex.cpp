@@ -66,7 +66,8 @@ void vertex::drawText(RenderWindow& window, const Vector2f& posc, const string& 
   auto text{ sf::Text{ txt, font, config::TEXT_SIZE } };
   text.setFillColor(color);
   const auto r{ text.getGlobalBounds() };
-  text.setPosition(posc - r.getPosition() - r.getSize() / 2.f);
+  text.setOrigin(r.getPosition() + r.getSize() / 2.f);
+  text.setPosition(posc);
   window.draw(text);
 }
 
@@ -115,6 +116,25 @@ auto lineConnectParameters(const Vertex& from, const Vertex& to, bool shift) {
   return std::make_tuple(x1, y1, x2, y2, fi);
 }
 
+void signLine(
+  RenderWindow& window,
+  const sf::Vector2f& pos,
+  const sf::Vector2f& normal,
+  const std::string& txt,
+  float fi,
+  const sf::Color& color
+) {
+  const auto font{ utils::getFont() };
+  auto text{ sf::Text{ txt, font, config::LABEL_SIZE } };
+  const auto r{ text.getGlobalBounds() };
+  text.setFillColor(color);
+  text.setOrigin(r.getPosition() + r.getSize() / 2.f);
+  text.rotate(toDegrees(fi));
+  text.setPosition(pos);
+  text.move(normal * (r.height + config::LINE_WIDTH) / 2.f);
+  window.draw(text);
+}
+
 void vertex::lineConnect(
   RenderWindow& window,
   const Vertex& from,
@@ -130,8 +150,8 @@ void vertex::lineConnect(
 
 void vertex::lineConnect(
   sf::RenderWindow& window,
-  const vertex::Vertex& from,
-  const vertex::Vertex& to,
+  const Vertex& from,
+  const Vertex& to,
   const std::string& txt,
   bool shift,
   bool dir,
@@ -142,20 +162,12 @@ void vertex::lineConnect(
 
   const auto dx{ x2 - x1 };
   const auto dy{ y2 - y1 };
-  const auto centerX{ (x1 + x2) / 2.f };
-  const auto centerY{ (y1 + y2) / 2.f };
+  const auto center{ sf::Vector2f{ (x1 + x2) / 2.f, (y1 + y2) / 2.f } };
   const auto length{ sqrtf(dx * dx + dy * dy) };
-  const auto parallel{ 1.f * sf::Vector2f{ dy, -dx } / length };
+  const auto normal{ sf::Vector2f{ dy, -dx } / length };
+  const auto theta{ atanf(dy / dx) };
 
-  const auto font{ utils::getFont() };
-  auto text{ sf::Text{ txt, font, config::LABEL_SIZE } };
-  const auto r{ text.getGlobalBounds() };
-  text.setFillColor(color);
-  text.setOrigin(r.getPosition() + r.getSize() / 2.f);
-  text.rotate(toDegrees(atanf(dy / dx)));
-  text.setPosition(centerX, centerY);
-  text.move(parallel * (r.height + config::LINE_WIDTH) / 2.f);
-  window.draw(text);
+  signLine(window, center, normal, txt, theta, color);
 
   if (dir) arrows(window, x2, y2, fi + PI, PI / 8, color);
 }
@@ -206,10 +218,10 @@ void vertex::arcConnect(
 
   const auto height{ 2.f * config::VERTEX_RADIUS };
   const auto length{ sqrtf(dx * dx + dy * dy) };
-  const auto parallel{ sf::Vector2f{ dy, -dx } / length };
+  const auto normal{ sf::Vector2f{ dy, -dx } / length };
   const auto center{ sf::Vector2f{ (x1 + x2) / 2.f, (y1 + y2) / 2.f } };
 
-  const auto top{ center + height * parallel };
+  const auto top{ center + height * normal };
   const auto bezier{ bezierCurve2Closure({ x1, y1 }, top, { x2, y2 }, config::CURVE_ITEMS) };
   for (size_t i{ 0 }; i < config::CURVE_ITEMS; i++) {
     line(window, bezier(i), bezier(i + 1), color);
@@ -217,16 +229,10 @@ void vertex::arcConnect(
 
   const auto fl{ floorf(config::CURVE_ITEMS / 2.f) };
   const auto ce{ ceilf(config::CURVE_ITEMS / 2.f) };
+  const auto position{ (bezier(fl) + bezier(ce)) / 2.f };
+  const auto theta{ atan(dy / dx) };
+  signLine(window, position, normal, txt, theta, color);
 
-  const auto font{ utils::getFont() };
-  auto text{ sf::Text{ txt, font, config::LABEL_SIZE } };
-  const auto r{ text.getGlobalBounds() };
-  text.setFillColor(color);
-  text.setOrigin(r.getPosition() + r.getSize() / 2.f);
-  text.rotate(toDegrees(atan(dy / dx)));
-  text.setPosition((bezier(fl) + bezier(ce)) / 2.f);
-  text.move(parallel * (r.height + config::LINE_WIDTH) / 2.f);
-  window.draw(text);
   if (dir) {
     const auto f{ atan2f(top.y - y2, top.x - x2) };
     arrows(window, x2, y2, f, PI / 8, color);
@@ -260,17 +266,11 @@ void vertex::loop(
   line(window, { x1 + config::LINE_WIDTH / 3, y1 }, { x2 - config::LINE_WIDTH / 3, y2 }, color);
   line(window, { x2, y2 }, { x, y }, color);
 
-  const auto lh{ fabs(x1 - x2  + 2 * config::LINE_WIDTH / 3) };
-  const auto l{ sqrtf(radius * radius - lh * lh / 4) };
-
-  const auto font{ utils::getFont() };
-  auto text{ sf::Text{ txt, font, config::LABEL_SIZE } };
-  const auto r{ text.getGlobalBounds() };
-  text.setFillColor(color);
-  text.setOrigin(r.getPosition() + r.getSize() / 2.f);
-  text.setPosition(x, y - l);
-  text.move({ 0.f, (r.height + config::LINE_WIDTH) / 2.f });
-  window.draw(text);
+  const auto lh{ fabs(x1 - x2  + 2.f * config::LINE_WIDTH / 3.f) };
+  const auto l{ sqrtf(radius * radius - lh * lh / 4.f) };
+  const auto position{ sf::Vector2f{ x, y - l } };
+  const auto normal{ sf::Vector2f{ 0.f, 1.f } };
+  signLine(window, position, normal, txt, 0.f, color);
 
   if (dir) arrows(window, x, y, PI / 4 + PI, PI / 8, color);
 }
