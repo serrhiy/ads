@@ -1,10 +1,10 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #include "config.hpp"
 #include "utils.hpp"
 #include "vertex.hpp"
 #include "matrix.hpp"
 #include "draw.hpp"
-#include <iostream>
 
 using matrix::matrix_t;
 
@@ -19,10 +19,11 @@ int main(int argc, const char* argv[]) {
   utils::manageWindow(window, config::WIDTH, config::HEIGHT, config::TITLE);
   utils::clearWindow(window, config::BACKGROUND_COLOR);
 
-  auto directed{ matrix::adjacencyMatrix(11, config::SEED, config::k) };
-  std::cout << directed << std::endl;
-  drawGraph(window, directed);
+  const auto directed{ matrix::adjacencyMatrix(config::VERTICES_COUNT, config::SEED, config::k) };
+  const auto undirected{ matrix::toUndirected(directed) };
+  const auto w{ matrix::weightedMatrix(undirected, config::SEED) };
 
+  drawGraph(window, w);
   utils::pollEvents(window);
   return 0;
 }

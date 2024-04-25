@@ -56,13 +56,12 @@ void connectVertices(
   const auto j{ to.index };
   const auto count{ matrix.size() };
   const std::string str{ std::to_string(matrix[i][j]) };
-  if (i == j) vertex::loop(window, from);
+  if (i == j) vertex::loop(window, from, str, directed, color);
   else if (!isNeighbours(count, i, j) && inOneLine(count, sides, i, j)) {
     vertex::arcConnect(window, from, to, str, directed, color);
   }
   else {
-    const bool shift{ j < i && matrix[j][i] };
-    vertex::lineConnect(window, from, to, str, shift, directed, color);
+    vertex::lineConnect(window, from, to, str, false, directed, color);
   }
 }
 
@@ -70,12 +69,12 @@ void draw::drawGraph(sf::RenderWindow& window, const matrix_t& matrix, size_t si
   const auto count{ matrix.size() };
   const auto getVertex{ vertex::getVertexClosure(count, sides) };
   const auto connect{ 
-    std::bind(connectVertices, _1, matrix, sides, _2, _3, config::LINE_COLOR, true)
+    std::bind(connectVertices, _1, matrix, sides, _2, _3, config::LINE_COLOR, false)
   };
   for (size_t i{ 0 }; i < count; i++) {
     const auto vertex{ getVertex(i) };
     vertex::draw(window, vertex);
-    for (size_t j{ 0 }; j < count; j++) {
+    for (size_t j{ 0 }; j < i + 1; j++) {
       if (!matrix[i][j]) continue;
       const auto otherVertex{ getVertex(j) };
       connect(window, vertex, otherVertex);

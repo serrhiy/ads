@@ -26,6 +26,14 @@ float distance(float x1, float y1, float x2, float y2) {
   return sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
+float distance(const sf::Vector2f& p1, const sf::Vector2f& p2) {
+  return distance(p1.x, p1.y, p2.x, p2.y);
+}
+
+float length(const sf::Vector2f& vector) {
+  return sqrtf(vector.x * vector.x + vector.y * vector.y);
+}
+
 std::function<Vector2f(size_t)> bezierCurve2Closure(
   const Vector2f& p1,
   const Vector2f& p2,
@@ -137,13 +145,14 @@ void vertex::lineConnect(
   const auto centerX{ (x1 + x2) / 2.f };
   const auto centerY{ (y1 + y2) / 2.f };
   const auto length{ sqrtf(dx * dx + dy * dy) };
-  const auto parallel{ sf::Vector2f{ dy, -dx } / length };
+  const auto parallel{ 1.f * sf::Vector2f{ dy, -dx } / length };
 
   const auto font{ utils::getFont() };
   auto text{ sf::Text{ txt, font, config::LABEL_SIZE } };
   const auto r{ text.getGlobalBounds() };
   text.setFillColor(color);
   text.setOrigin(r.getPosition() + r.getSize() / 2.f);
+  text.rotate(toDegrees(atanf(dy / dx)));
   text.setPosition(centerX, centerY);
   text.move(parallel * (r.height + config::LINE_WIDTH) / 2.f);
   window.draw(text);
@@ -199,18 +208,22 @@ void vertex::arcConnect(
   const auto length{ sqrtf(dx * dx + dy * dy) };
   const auto parallel{ sf::Vector2f{ dy, -dx } / length };
   const auto center{ sf::Vector2f{ (x1 + x2) / 2.f, (y1 + y2) / 2.f } };
+
   const auto top{ center + height * parallel };
   const auto bezier{ bezierCurve2Closure({ x1, y1 }, top, { x2, y2 }, config::CURVE_ITEMS) };
   for (size_t i{ 0 }; i < config::CURVE_ITEMS; i++) {
     line(window, bezier(i), bezier(i + 1), color);
   }
-  const auto font{ utils::getFont() };
+
   const auto fl{ floorf(config::CURVE_ITEMS / 2.f) };
   const auto ce{ ceilf(config::CURVE_ITEMS / 2.f) };
+
+  const auto font{ utils::getFont() };
   auto text{ sf::Text{ txt, font, config::LABEL_SIZE } };
   const auto r{ text.getGlobalBounds() };
   text.setFillColor(color);
   text.setOrigin(r.getPosition() + r.getSize() / 2.f);
+  text.rotate(toDegrees(atan(dy / dx)));
   text.setPosition((bezier(fl) + bezier(ce)) / 2.f);
   text.move(parallel * (r.height + config::LINE_WIDTH) / 2.f);
   window.draw(text);
@@ -228,6 +241,37 @@ void vertex::loop(RenderWindow& window, const Vertex& vertex, bool dir, const sf
   line(window, { x, y }, { x1, y1 }, color);
   line(window, { x1 + config::LINE_WIDTH / 3, y1 }, { x2 - config::LINE_WIDTH / 3, y2 }, color);
   line(window, { x2, y2 }, { x, y }, color);
+  if (dir) arrows(window, x, y, PI / 4 + PI, PI / 8, color);
+}
+
+void vertex::loop(
+  RenderWindow& window,
+  const Vertex& vertex,
+  const std::string& txt,
+  bool dir,
+  const sf::Color& color
+) {
+  const auto radius{ config::VERTEX_RADIUS };
+  const auto x{ vertex.x };
+  const auto y{ vertex.y - radius - config::LINE_WIDTH };
+  const auto [x1, y1]{ rotate(x, y, radius, -PI / 4) };
+  const auto [x2, y2]{ rotate(x, y, radius, -3 * PI / 4) };
+  line(window, { x, y }, { x1, y1 }, color);
+  line(window, { x1 + config::LINE_WIDTH / 3, y1 }, { x2 - config::LINE_WIDTH / 3, y2 }, color);
+  line(window, { x2, y2 }, { x, y }, color);
+
+  const auto lh{ fabs(x1 - x2  + 2 * config::LINE_WIDTH / 3) };
+  const auto l{ sqrtf(radius * radius - lh * lh / 4) };
+
+  const auto font{ utils::getFont() };
+  auto text{ sf::Text{ txt, font, config::LABEL_SIZE } };
+  const auto r{ text.getGlobalBounds() };
+  text.setFillColor(color);
+  text.setOrigin(r.getPosition() + r.getSize() / 2.f);
+  text.setPosition(x, y - l);
+  text.move({ 0.f, (r.height + config::LINE_WIDTH) / 2.f });
+  window.draw(text);
+
   if (dir) arrows(window, x, y, PI / 4 + PI, PI / 8, color);
 }
 

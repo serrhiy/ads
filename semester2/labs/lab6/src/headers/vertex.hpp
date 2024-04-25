@@ -49,6 +49,13 @@ namespace vertex {
     bool dir = true,
     const sf::Color& color = config::LINE_COLOR
   );
+  void loop(
+    sf::RenderWindow& window,
+    const Vertex& vertex,
+    const std::string& txt,
+    bool dir = true,
+    const sf::Color& color = config::LINE_COLOR
+  );
   std::function<Vertex(size_t)> getVertexClosure(
     size_t count,
     size_t sides = config::SIDES,
