@@ -81,3 +81,7 @@ void draw::drawGraph(sf::RenderWindow& window, const matrix_t& matrix, size_t si
     }
   }
 }
+
+// std::function<void(sf::RenderWindow&)> skeletonClosure() {
+
+// };

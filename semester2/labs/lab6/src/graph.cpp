@@ -5,8 +5,7 @@
 #include "matrix.hpp"
 #include "graph.hpp"
 
-using matrix::matrix_t, matrix::row_t;
-using return_type = std::tuple<matrix_t, std::vector<std::pair<size_t, size_t>>, size_t>;
+using matrix::matrix_t, matrix::row_t, graph::mst_t;
 
 auto minEdge(const matrix_t& matrix) {
   const auto size{ matrix.size() };
@@ -51,9 +50,11 @@ bool hasLoop(const matrix_t& matrix) {
   return false;
 }
 
-std::pair<matrix_t, size_t> graph::kruskal(const matrix_t& weighted) {
+std::tuple<matrix_t, mst_t, size_t> graph::kruskal(const matrix_t& weighted) {
   const auto size{ weighted.size() };
   matrix_t matrix{ weighted };
+  mst_t path{  };
+  path.reserve(size - 1);
   matrix_t graph(size);
   std::generate(graph.begin(), graph.end(), [size]() { return row_t(size); });
   std::vector<bool> visited(size, false);
@@ -63,10 +64,12 @@ std::pair<matrix_t, size_t> graph::kruskal(const matrix_t& weighted) {
     matrix[row][col] = matrix[col][row] = 0;
     visited[row] = visited[col] = true;
     graph[row][col] = min;
+    if (hasLoop(graph)) {
+      graph[row][col] = 0;
+      continue;
+    }
     weight += min;
-    if (!hasLoop(graph)) continue;
-    graph[row][col] = 0;
-    weight -= min;
+    path.push_back({ row, col });
   }
-  return { graph, weight };
+  return { graph, path, weight };
 }

@@ -82,13 +82,18 @@ void leftCornerText(sf::RenderWindow& window, const std::string& txt) {
   window.display();
 }
 
-void utils::pollEvents(sf::RenderWindow& window) {
+void utils::pollEvents(
+  sf::RenderWindow& window,
+  const std::function<bool(const sf::Event&)> triger,
+  const std::function<void(sf::RenderWindow&)> callback
+) {
   while (window.isOpen()) {
     sf::Event event;
     while (window.pollEvent(event)) {
       for (const auto &[triger, callback] : globalEvents) {
         if (triger(event)) callback(window);
       }
+      if (triger(event)) callback(window);
     }
   }
 }
