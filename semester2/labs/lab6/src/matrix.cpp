@@ -1,10 +1,9 @@
-#include <iostream>
 #include <functional>
+#include <iostream>
 #include <iomanip>
 #include <vector>
-#include <cmath>
 #include <string>
-#include <algorithm>
+#include <cmath>
 #include "matrix.hpp"
 
 using matrix::matrix_t, matrix::row_t, matrix::floatMatrix, matrix::float_row;

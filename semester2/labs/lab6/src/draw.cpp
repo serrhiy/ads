@@ -1,9 +1,8 @@
 #include <SFML/Graphics.hpp>
-#include <cmath>
-#include <memory>
 #include <functional>
+#include <memory>
 #include <string>
-#include <iostream>
+#include <cmath>
 #include "draw.hpp"
 #include "vertex.hpp"
 #include "matrix.hpp"
@@ -11,22 +10,6 @@
 
 using matrix::matrix_t, graph::mst_t;
 using namespace std::placeholders;
-
-const std::array colors{
-  sf::Color(255, 154, 141), // Salmon
-  sf::Color(255, 165, 0),   // Orange
-  sf::Color::Yellow,        // Yellow
-  sf::Color(188,169,225),  // Light Purple
-  sf::Color::Green,         // Green
-  sf::Color(231,236,163),   // Light Yellow
-  sf::Color::Magenta,       // Magenta
-  sf::Color(255, 110, 64),  // Red-orange
-  sf::Color(24, 104, 174),  // Burnt sienna
-  sf::Color(229, 33, 101),  // Pink
-  sf::Color(157,225,154),   // Ligh Green
-  sf::Color(178, 2, 56),    // Brick
-  sf::Color(255, 193, 59),  // Mango
-};
 
 bool isNeighbours(size_t count, size_t i, size_t j) {
   if (i > j) std::swap(i, j);
@@ -62,7 +45,8 @@ void connectVertices(
     vertex::arcConnect(window, from, to, str, directed, color);
   }
   else {
-    vertex::lineConnect(window, from, to, str, false, directed, color);
+    const auto shift{ directed && j < i && matrix[j][i] };
+    vertex::lineConnect(window, from, to, str, shift, directed, color);
   }
 }
 

@@ -1,8 +1,6 @@
-#include <vector>
-#include <stack>
-#include <queue>
 #include <algorithm>
-#include <iostream>
+#include <vector>
+#include <queue>
 #include "matrix.hpp"
 #include "graph.hpp"
 
@@ -24,23 +22,7 @@ auto minEdge(const matrix_t& matrix) {
   }
   return std::make_tuple(min, row, col);
 }
-// const hasLoop = (matrix, start) => {
-//   const { length } = matrix;
-//   const visited = new Array(length).fill(false);
-//   const queue = [[Infinity, start]];
-//   visited[start] = true;
-//   while (queue.length) {
-//     const [from, vertex] = queue.shift();
-//     for (let i = 0; i < length; i++) {
-//       if (i === from) continue;
-//       if (matrix[vertex][i] && visited[i]) return true;
-//       if (!matrix[vertex][i] || visited[i]) continue;
-//       visited[i] = true;
-//       queue.push([vertex, i]);
-//     }
-//   }
-//   return false;
-// };
+
 bool hasLoop(const matrix_t& matrix, size_t start) {
   const auto size{ matrix.size() };
   auto visited{ std::vector<bool>(size, false) };

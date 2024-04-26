@@ -1,10 +1,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <functional>
 #include "config.hpp"
 #include "matrix.hpp"
 #include "vertex.hpp"
 #include "graph.hpp"
-#include <functional>
+
 using matrix::matrix_t, graph::mst_t;
 
 namespace draw {

@@ -1,8 +1,7 @@
 #include <SFML/Graphics.hpp>
+#include <functional>
 #include "config.hpp"
 #include "utils.hpp"
-#include <iostream>
-#include <functional>
 
 using utils::events_t;
 

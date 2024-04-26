@@ -1,6 +1,6 @@
 #pragma once
-#include <string>
 #include <SFML/Graphics/Color.hpp>
+#include <string>
 
 namespace config {
   extern const char* TITLE;
