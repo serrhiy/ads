@@ -1,5 +1,6 @@
 #include <vector>
 #include <stack>
+#include <queue>
 #include <algorithm>
 #include <iostream>
 #include "matrix.hpp"
@@ -23,29 +24,39 @@ auto minEdge(const matrix_t& matrix) {
   }
   return std::make_tuple(min, row, col);
 }
-
-bool hasLoop(const matrix_t& matrix) {
-  const size_t start{ 0 };
+// const hasLoop = (matrix, start) => {
+//   const { length } = matrix;
+//   const visited = new Array(length).fill(false);
+//   const queue = [[Infinity, start]];
+//   visited[start] = true;
+//   while (queue.length) {
+//     const [from, vertex] = queue.shift();
+//     for (let i = 0; i < length; i++) {
+//       if (i === from) continue;
+//       if (matrix[vertex][i] && visited[i]) return true;
+//       if (!matrix[vertex][i] || visited[i]) continue;
+//       visited[i] = true;
+//       queue.push([vertex, i]);
+//     }
+//   }
+//   return false;
+// };
+bool hasLoop(const matrix_t& matrix, size_t start) {
   const auto size{ matrix.size() };
-  std::vector<bool> visited(size, false);
-  std::stack<size_t> stack{  };
+  auto visited{ std::vector<bool>(size, false) };
+  auto queue{ std::queue<std::pair<size_t, size_t>>{  } };
   visited[start] = true;
-  stack.push(start);
-  bool returns{ false };
-  label: while (!stack.empty()) {
-    const auto vertex{ stack.top() };
+  queue.push({ SIZE_MAX, start });
+  while (!queue.empty()) {
+    const auto [from, vertex]{ queue.front() };
+    queue.pop();
     for (size_t i{ 0 }; i < size; i++) {
-      const auto connect{ matrix[vertex][i] };
-      const auto visit{ visited[i] };
-      if (!returns && connect && visit) return true;
-      if (!connect || visit) continue;
+      if (from == i) continue;
+      if (matrix[vertex][i] && visited[i]) return true;
+      if (!matrix[vertex][i] || visited[i]) continue;
       visited[i] = true;
-      stack.push(i);
-      returns = false;
-      goto label;
+      queue.push({vertex, i});
     }
-    returns = true;
-    stack.pop();
   }
   return false;
 }
@@ -63,9 +74,9 @@ std::tuple<matrix_t, mst_t, size_t> graph::kruskal(const matrix_t& weighted) {
     const auto [min, row, col]{ minEdge(matrix) };
     matrix[row][col] = matrix[col][row] = 0;
     visited[row] = visited[col] = true;
-    graph[row][col] = min;
-    if (hasLoop(graph)) {
-      graph[row][col] = 0;
+    graph[row][col] = graph[col][row] = min;
+    if (hasLoop(graph, row) || hasLoop(graph, col)) {
+      graph[row][col] = graph[col][row] = 0;
       continue;
     }
     weight += min;

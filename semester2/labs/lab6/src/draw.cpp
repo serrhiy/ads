@@ -7,8 +7,9 @@
 #include "draw.hpp"
 #include "vertex.hpp"
 #include "matrix.hpp"
+#include "graph.hpp"
 
-using matrix::matrix_t;
+using matrix::matrix_t, graph::mst_t;
 using namespace std::placeholders;
 
 const std::array colors{
@@ -82,6 +83,24 @@ void draw::drawGraph(sf::RenderWindow& window, const matrix_t& matrix, size_t si
   }
 }
 
-// std::function<void(sf::RenderWindow&)> skeletonClosure() {
-
-// };
+std::function<void(sf::RenderWindow&)> draw::skeletonClosure(
+  const matrix_t& matrix,
+  const mst_t& path,
+  size_t sides,
+  int windowSize
+) {
+  const auto size{ matrix.size() };
+  const auto getVertex{ vertex::getVertexClosure(size, sides, windowSize) };
+  const auto connect{ std::bind(connectVertices, _1, matrix, sides, _2, _3, _4, false) };
+  const auto stepP{ std::make_shared<size_t>(0) };
+  return [&path, getVertex, connect, stepP](sf::RenderWindow& window) {
+    const auto step{ *stepP };
+    if (step >= path.size()) return;
+    const auto [i, j]{ path[step] };
+    const auto from{ getVertex(i) };
+    const auto to{ getVertex(j) };
+    connect(window, to, from, config::ACTIVE_VERTEX_COLOR);
+    *stepP += 1;
+    window.display();
+  };
+};
