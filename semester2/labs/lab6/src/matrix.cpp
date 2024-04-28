@@ -6,7 +6,7 @@
 #include <cmath>
 #include "matrix.hpp"
 
-using matrix::matrix_t, matrix::row_t, matrix::floatMatrix, matrix::float_row;
+using matrix::matrix_t, matrix::row_t;
 
 float random(float min, float max) {
   const auto r{ static_cast<float>(rand()) / (RAND_MAX + 1) };

@@ -28,7 +28,7 @@ int main(int argc, const char* argv[]) {
 
   const auto [mst, path, weight]{ graph::kruskal(weighted) };
 
-  std::cout << "Undirected:\n" << undirected << std::endl;
+  std::cout << "Directed:\n" << directed << std::endl;
   std::cout << "Weighted:\n" << weighted << std::endl;
   std::cout << "Minimum spanning tree:\n" << mst << std::endl;
   std::cout << "Sum of the weights of the minimum spanning tree: " << weight << std::endl;

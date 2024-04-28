@@ -17,5 +17,3 @@ namespace draw {
     int size
   );
 }
-
-

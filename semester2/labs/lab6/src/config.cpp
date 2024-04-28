@@ -19,7 +19,6 @@ namespace config {
   const unsigned CURVE_ITEMS{ 20 };
   const int n1{ 3 }, n2{ 1 }, n3{ 1 }, n4{ 2 };
   const float k{ 1.f - n3 * 0.01f - n4 * 0.005f - 0.05f };
-  //const float k{ 0.75f - n3 * 0.01f - n4 * 0.005f - 0.1f };
   const size_t VERTICES_COUNT{ 10 + n3 };
   const size_t SIDES{ 4 };
   const int SEED{ n1 * 1000 + n2 * 100 + n3 * 10 + n4 };

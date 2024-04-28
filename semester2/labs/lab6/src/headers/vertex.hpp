@@ -11,14 +11,6 @@ namespace vertex {
     size_t index;
   };
   void draw(sf::RenderWindow& window, const vertex::Vertex& vertex, const sf::Color& color = config::LINE_COLOR);
-  void lineConnect(
-    sf::RenderWindow& window,
-    const Vertex& from,
-    const Vertex& to,
-    bool shift = false,
-    bool dir = true,
-    const sf::Color& color = config::LINE_COLOR
-  );
     void lineConnect(
     sf::RenderWindow& window,
     const vertex::Vertex& from,
@@ -33,21 +25,8 @@ namespace vertex {
     const Vertex& from,
     const Vertex& to,
     const std::string& txt,
-    bool dir = true,
-    const sf::Color& color = config::LINE_COLOR
-  );
-  void arcConnect(
-    sf::RenderWindow& window,
-    const Vertex& from,
-    const Vertex& to,
-    bool dir = true,
-    const sf::Color& color = config::LINE_COLOR
-  );
-  void loop(
-    sf::RenderWindow& window,
-    const Vertex& vertex,
-    bool dir = true,
-    const sf::Color& color = config::LINE_COLOR
+    bool dir,
+    const sf::Color& color
   );
   void loop(
     sf::RenderWindow& window,

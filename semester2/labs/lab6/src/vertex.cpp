@@ -107,22 +107,14 @@ void arrows(
   line(window, { x, y }, { rx, ry }, color);
 }
 
-auto lineConnectParameters(const Vertex& from, const Vertex& to, bool shift) {
-  const auto fi{ atan2f(to.y - from.y, to.x - from.x) };
-  const auto f1{ shift ? fi - PI / 8 : fi  };
-  const auto f2{ shift ? fi + PI + PI / 8 : fi + PI };
-  const auto [x1, y1]{ rotate(from.x, from.y, config::VERTEX_RADIUS + config::LINE_WIDTH, f1) };
-  const auto [x2, y2]{ rotate(to.x, to.y, config::VERTEX_RADIUS + config::LINE_WIDTH, f2) };
-  return std::make_tuple(x1, y1, x2, y2, fi);
-}
-
 void signLine(
   RenderWindow& window,
   const sf::Vector2f& pos,
   const sf::Vector2f& normal,
   const std::string& txt,
   float fi,
-  const sf::Color& color
+  const sf::Color& color,
+  bool shift = false
 ) {
   const auto font{ utils::getFont() };
   auto text{ sf::Text{ txt, font, config::LABEL_SIZE } };
@@ -130,22 +122,13 @@ void signLine(
   text.setFillColor(color);
   text.setOrigin(r.getPosition() + r.getSize() / 2.f);
   text.rotate(toDegrees(fi));
-  text.setPosition(pos);
+  if (shift) {
+    const auto direction{ sf::Vector2f{ -normal.y, normal.x } };
+    text.setPosition(pos + direction * r.width);
+  }
+  else text.setPosition(pos);
   text.move(normal * (r.height + config::LINE_WIDTH) / 2.f);
   window.draw(text);
-}
-
-void vertex::lineConnect(
-  RenderWindow& window,
-  const Vertex& from,
-  const Vertex& to,
-  bool shift,
-  bool dir,
-  const sf::Color& color
-) {
-  const auto [x1, y1, x2, y2, fi]{ lineConnectParameters(from, to, shift) };
-  line(window, { x1, y1 }, { x2, y2 }, color);
-  if (dir) arrows(window, x2, y2, fi + PI, PI / 8, color);
 }
 
 void vertex::lineConnect(
@@ -157,7 +140,11 @@ void vertex::lineConnect(
   bool dir,
   const sf::Color& color
 ) {
-  const auto [x1, y1, x2, y2, fi]{ lineConnectParameters(from, to, shift) };
+  const auto fi{ atan2f(to.y - from.y, to.x - from.x) };
+  const auto f1{ shift ? fi - PI / 8 : fi  };
+  const auto f2{ shift ? fi + PI + PI / 8 : fi + PI };
+  const auto [x1, y1]{ rotate(from.x, from.y, config::VERTEX_RADIUS + config::LINE_WIDTH, f1) };
+  const auto [x2, y2]{ rotate(to.x, to.y, config::VERTEX_RADIUS + config::LINE_WIDTH, f2) };
   line(window, { x1, y1 }, { x2, y2 }, color);
 
   const auto dx{ x2 - x1 };
@@ -167,38 +154,9 @@ void vertex::lineConnect(
   const auto normal{ sf::Vector2f{ dy, -dx } / length };
   const auto theta{ atanf(dy / dx) };
 
-  signLine(window, center, normal, txt, theta, color);
+  signLine(window, center, normal, txt, theta, color, true);
 
   if (dir) arrows(window, x2, y2, fi + PI, PI / 8, color);
-}
-
-void vertex::arcConnect(
-  sf::RenderWindow& window,
-  const Vertex& from,
-  const Vertex& to,
-  bool dir,
-  const sf::Color& color
-) {
-  const auto fi{ atan2f(to.y - from.y, to.x - from.x) };
-  const auto [x1, y1]{ rotate(from.x, from.y, config::VERTEX_RADIUS + config::LINE_WIDTH, fi - PI / 6) };
-  const auto [x2, y2]{ rotate(to.x, to.y, config::VERTEX_RADIUS + config::LINE_WIDTH, fi + PI + PI / 6) };
-  
-  const auto dx{ x2 - x1 };
-  const auto dy{ y2 - y1 };
-
-  const auto height{ 2.f * config::VERTEX_RADIUS };
-  const auto length{ sqrtf(dx * dx + dy * dy) };
-  const auto parallel{ sf::Vector2f{ dy, -dx } / length };
-  const auto center{ sf::Vector2f{ (x1 + x2) / 2.f, (y1 + y2) / 2.f } };
-  const auto top{ center + height * parallel };
-  const auto bezier{ bezierCurve2Closure({ x1, y1 }, top, { x2, y2 }, config::CURVE_ITEMS) };
-  for (size_t i{ 0 }; i < config::CURVE_ITEMS; i++) {
-    line(window, bezier(i), bezier(i + 1), color);
-  }
-  if (dir) {
-    const auto f{ atan2f(top.y - y2, top.x - x2) };
-    arrows(window, x2, y2, f, PI / 8, color);
-  }
 }
 
 void vertex::arcConnect(
@@ -237,17 +195,6 @@ void vertex::arcConnect(
     const auto f{ atan2f(top.y - y2, top.x - x2) };
     arrows(window, x2, y2, f, PI / 8, color);
   }
-}
-
-void vertex::loop(RenderWindow& window, const Vertex& vertex, bool dir, const sf::Color& color) {
-  const auto x{ vertex.x };
-  const auto y{ vertex.y - config::VERTEX_RADIUS - config::LINE_WIDTH };
-  const auto [x1, y1]{ rotate(x, y, config::VERTEX_RADIUS, -PI / 4) };
-  const auto [x2, y2]{ rotate(x, y, config::VERTEX_RADIUS, -3 * PI / 4) };
-  line(window, { x, y }, { x1, y1 }, color);
-  line(window, { x1 + config::LINE_WIDTH / 3, y1 }, { x2 - config::LINE_WIDTH / 3, y2 }, color);
-  line(window, { x2, y2 }, { x, y }, color);
-  if (dir) arrows(window, x, y, PI / 4 + PI, PI / 8, color);
 }
 
 void vertex::loop(
