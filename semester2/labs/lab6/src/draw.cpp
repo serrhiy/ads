@@ -83,7 +83,7 @@ std::function<void(sf::RenderWindow&)> draw::skeletonClosure(
     const auto [i, j]{ path[step] };
     const auto from{ getVertex(i) };
     const auto to{ getVertex(j) };
-    connect(window, to, from, config::ACTIVE_VERTEX_COLOR);
+    connect(window, from, to, config::ACTIVE_VERTEX_COLOR);
     *stepP += 1;
     window.display();
   };

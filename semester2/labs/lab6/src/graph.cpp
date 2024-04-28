@@ -1,4 +1,6 @@
+#include <functional>
 #include <algorithm>
+#include <iostream>
 #include <vector>
 #include <queue>
 #include "matrix.hpp"
@@ -6,21 +8,40 @@
 
 using matrix::matrix_t, matrix::row_t, graph::mst_t;
 
-auto minEdge(const matrix_t& matrix) {
+template<typename T>
+void quickSort(
+  std::vector<T>& array,
+  long long start,
+  long long end,
+  const std::function<bool(const T&, const T&)>& comparator
+) {
+  if (end <= start) return;
+  long long i{ start - 1 };
+  auto pivot{ array[end] };
+  for (auto j{ start }; j < end; j++) {
+    if (!comparator(array[j], pivot)) continue;
+    i++;
+    array[i].swap(array[j]);
+  }
+  i++;
+  array[i].swap(array[end]);
+  quickSort(array, start, i - 1, comparator);
+  quickSort(array, i + 1, end, comparator);
+}
+
+auto sortMatrix(const matrix_t& matrix) {
   const auto size{ matrix.size() };
-  size_t min{ SIZE_MAX };
-  size_t row{ SIZE_MAX };
-  size_t col{ SIZE_MAX };
+  std::vector<std::tuple<size_t, size_t, int>> result{  };
   for (size_t i{ 0 }; i < size; i++) {
-    for (size_t j{ 0 }; j < size; j++) {
-      const auto item{ matrix[i][j] };
-      if (item == 0 || min <= item) continue;
-      min = item;
-      row = i;
-      col = j;
+    for (size_t j{ 0 }; j <= i; j++) {
+      const auto weight{ matrix[i][j] };
+      if (weight != 0) result.push_back({ i, j, weight });
     }
   }
-  return std::make_tuple(min, row, col);
+  quickSort<std::tuple<size_t, size_t, int>>(result, 0, result.size() - 1, [](const auto& x, const auto& y) {
+    return std::get<2>(x) < std::get<2>(y);
+  });
+  return result;
 }
 
 bool hasLoop(const matrix_t& matrix, size_t start) {
@@ -52,8 +73,11 @@ std::tuple<matrix_t, mst_t, size_t> graph::kruskal(const matrix_t& weighted) {
   std::generate(graph.begin(), graph.end(), [size]() { return row_t(size); });
   std::vector<bool> visited(size, false);
   size_t weight{ 0 };
+  const auto weights{ sortMatrix(weighted) };
+  size_t index{ 0 };
   while (std::find(visited.begin(), visited.end(), false) != visited.end()) {
-    const auto [min, row, col]{ minEdge(matrix) };
+    const auto [row, col, min]{ weights[index] };
+    index++;
     matrix[row][col] = matrix[col][row] = 0;
     visited[row] = visited[col] = true;
     graph[row][col] = graph[col][row] = min;

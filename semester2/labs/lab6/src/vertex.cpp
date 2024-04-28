@@ -122,11 +122,11 @@ void signLine(
   text.setFillColor(color);
   text.setOrigin(r.getPosition() + r.getSize() / 2.f);
   text.rotate(toDegrees(fi));
+  text.setPosition(pos);
   if (shift) {
     const auto direction{ sf::Vector2f{ -normal.y, normal.x } };
-    text.setPosition(pos + direction * r.width);
+    text.move(direction * r.width);
   }
-  else text.setPosition(pos);
   text.move(normal * (r.height + config::LINE_WIDTH) / 2.f);
   window.draw(text);
 }

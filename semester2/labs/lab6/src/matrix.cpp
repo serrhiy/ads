@@ -57,7 +57,8 @@ std::vector<std::vector<U>> map(
   return result;
 }
 
-std::vector<std::vector<float>> randomMatrix(size_t size) {
+std::vector<std::vector<float>> randomMatrix(size_t size, int seed) {
+  srand(seed);
   std::vector<std::vector<float>> result(size);
   for (size_t i{ 0 }; i < size; i++) {
     std::vector<float> row(size);
@@ -71,7 +72,7 @@ std::vector<std::vector<float>> randomMatrix(size_t size) {
 
 matrix_t matrix::weightedMatrix(const matrix_t& a, int seed) {
   const auto size{ a.size() };
-  const auto b{ randomMatrix(size) };
+  const auto b{ randomMatrix(size, seed) };
   const auto c{ map<float, int>(b, [&a](const float& x, size_t i, size_t j) {
     return static_cast<int>(ceil(x * 100 * a[i][j]));
   }) };
@@ -112,7 +113,8 @@ std::ostream& operator<<(std::ostream& os, const matrix_t& matrix) {
   os << std::setfill(' ') << std::endl;
   for (int i = 0; i < length; ++i) {
     os << std::setw(indent) << i << " |";
-    for (int j = 0; j < length; ++j) {
+    const auto rowSize{ matrix[i].size() };
+    for (int j = 0; j < rowSize; ++j) {
       os << std::setw(width) << matrix[i][j] << ' ';
     }
     os << std::endl;

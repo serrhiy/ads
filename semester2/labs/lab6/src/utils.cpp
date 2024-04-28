@@ -3,8 +3,6 @@
 #include "config.hpp"
 #include "utils.hpp"
 
-using utils::events_t;
-
 sf::RenderWindow& utils::manageWindow(
   sf::RenderWindow& window, unsigned width, unsigned height, const char* title
 ) {
@@ -18,16 +16,6 @@ sf::RenderWindow& utils::manageWindow(
   );
   window.setKeyRepeatEnabled(false);
   return window;
-}
-
-size_t utils::getFistOutVertex(const matrix_t& matrix) {
-  const size_t size{ matrix.size() };
-  for (size_t i{ 0 }; i < size; i++) {
-    for (size_t j{ 0 }; j < size; j++) {
-      if (matrix[i][j] && i != j) return i;
-    }
-  }
-  return SIZE_MAX;
 }
 
 std::function<bool(const sf::Event&)> utils::onKeyDown(const sf::Keyboard::Key& key) {
@@ -70,16 +58,6 @@ const std::vector globalEvents {
     }
   ),
 };
-
-void leftCornerText(sf::RenderWindow& window, const std::string& txt) {
-  const sf::Font font{ utils::getFont() };
-  sf::Text text{ txt, font, config::TEXT_SIZE };
-  text.setFillColor(config::LINE_COLOR);
-  const sf::Vector2f pos{ 5.f, 5.f };
-  text.setPosition(pos - text.getGlobalBounds().getPosition());
-  window.draw(text);
-  window.display();
-}
 
 void utils::pollEvents(
   sf::RenderWindow& window,
