@@ -15,16 +15,16 @@ class List {
     }
 
     ~List() {
-      auto node{ top };
+      Node* node{ top };
       while (node != nullptr) {
-        auto temp{ node };
+        Node* temp{ node };
         node = node->next;
-        free(temp);
+        delete temp;
       }
     }
 
     List& push(const T& x) {
-      const auto node{ new Node{ top, x } };
+      const Node* node{ new Node{ top, x } };
       if (node == nullptr) throw std::bad_alloc{  };
       top = node;
       return *this;

@@ -4,8 +4,8 @@
 #include <vector>
 #include <queue>
 #include "matrix.hpp"
-#include "list.hpp"
 #include "graph.hpp"
+#include "list.hpp"
 
 using matrix::matrix_t, matrix::row_t, graph::mst_t;
 
@@ -13,7 +13,7 @@ template<typename T>
 void sort(List<T>& list, const std::function<bool(const T&, const T&)>& comparator) {
   for (auto head{ list.getTop() }; head != nullptr; head = head->next) {
     for (auto start{ head->next }; start != nullptr; start = start->next) {
-      if (!comparator(start->value, head->value)) continue;
+      if (!comparator(head->value, start->value)) continue;
       std::swap(start->value, head->value);
     }
   }
@@ -29,7 +29,7 @@ auto sortMatrix(const matrix_t& matrix) {
     }
   }
   sort<std::tuple<size_t, size_t, int>>(result, [](const auto& x, const auto& y) {
-    return std::get<2>(x) < std::get<2>(y);
+    return std::get<2>(x) > std::get<2>(y);
   });
   return result;
 }
