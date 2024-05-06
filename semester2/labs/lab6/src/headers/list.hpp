@@ -1,5 +1,4 @@
 #pragma once
-#include <stdexcept>
 
 template<typename T>
 class List {
@@ -25,7 +24,6 @@ class List {
 
     List& push(const T& x) {
       const Node* node{ new Node{ top, x } };
-      if (node == nullptr) throw std::bad_alloc{  };
       top = node;
       return *this;
     }
