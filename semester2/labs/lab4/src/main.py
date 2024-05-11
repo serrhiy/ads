@@ -3,7 +3,7 @@ from utils import create_window, zip_vertices
 from matrix.print import print_matrix, draw_graph, write_routes
 from config import WIDTH, HEIGHT, VERTICES_COUNT, SIDES, n3, n4
 from matrix.operations import (
-  mul_matrix, transitive_closure, strong_connectivity, 
+  mul_matrix, transitive_reflexive_closure, strong_connectivity, 
   strong_connectivity_items, condensation_matrix
 )
 from matrix.graph import(
@@ -62,7 +62,7 @@ def task2(canvas1, canvas2):
   paths3 = routes(directed, directed3, 3)
   write_routes('ruotes2.csv', paths2)
   write_routes('ruotes3.csv', paths3)
-  reachability_matrix = transitive_closure(directed, VERTICES_COUNT - 1)
+  reachability_matrix = transitive_reflexive_closure(directed, VERTICES_COUNT - 1)
   print('reachability matrix:')
   print_matrix(reachability_matrix)
   strong_connectivity_matrix = strong_connectivity(reachability_matrix)

@@ -56,6 +56,12 @@ def transitive_closure(matrix, n):
     result = union(result, p_matrix)
   return result
 
+def transitive_reflexive_closure(matrix, n):
+  length = len(matrix)
+  identity = [[int(j == i) for j in range(length)] for i in range(length)]
+  transitive = transitive_closure(matrix, n)
+  return union(identity, transitive)
+
 def strong_connectivity(reachability):
   result = []
   length = len(reachability)
